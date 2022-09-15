@@ -197,6 +197,11 @@ namespace PowerLauncher.Plugin
 
                     if (results != null)
                     {
+                        foreach (var result in results)
+                        {
+                            Log.Debug($"Got result from {metadata.Name}: {result.Title ?? "null"}, Score {result.Score}", typeof(PluginManager));
+                        }
+
                         UpdatePluginMetadata(results, metadata, query);
                         UpdateResultWithActionKeyword(results, query);
                     }
