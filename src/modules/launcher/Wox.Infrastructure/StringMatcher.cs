@@ -7,6 +7,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Windows.Controls.Primitives;
+using Wox.Plugin;
+using Wox.Plugin.Logger;
 
 [assembly: InternalsVisibleTo("Microsoft.Plugin.Program.UnitTests")]
 [assembly: InternalsVisibleTo("Microsoft.PowerToys.Run.Plugin.System.UnitTests")]
@@ -175,7 +178,13 @@ namespace Wox.Infrastructure
             if (allQuerySubstringsMatched)
             {
                 var nearestSpaceIndex = CalculateClosestSpaceIndex(spaceIndices, firstMatchIndex);
-                var score = CalculateSearchScore(query, stringToCompare, firstMatchIndex - nearestSpaceIndex - 1, lastMatchIndex - firstMatchIndex, allSubstringsContainedInCompareString);
+                var score = CalculateSearchScore(query, stringToCompare, firstMatchIndex, firstMatchIndex - nearestSpaceIndex - 1, lastMatchIndex - firstMatchIndex, allSubstringsContainedInCompareString);
+
+                if (score > 60)
+                {
+                    // System.Diagnostics.Debug.Print("StringMatcher matched query: " + query + " string: " + stringToCompare + " score: " + score);
+                    Log.Debug("StringMatcher matched query: " + query + " string: " + stringToCompare + " score: " + score, typeof(StringMatcher));
+                }
 
                 return new MatchResult(true, UserSettingSearchPrecision, indexList, score);
             }
@@ -234,12 +243,22 @@ namespace Wox.Infrastructure
             return currentQuerySubstringIndex >= querySubstringsLength;
         }
 
-        private static int CalculateSearchScore(string query, string stringToCompare, int firstIndex, int matchLen, bool allSubstringsContainedInCompareString)
+        private static int CalculateSearchScore(string query, string stringToCompare, int firstMatchIndex, int firstIndex, int matchLen, bool allSubstringsContainedInCompareString)
         {
             // A match found near the beginning of a string is scored more than a match found near the end
             // A match is scored more if the characters in the patterns are closer to each other,
             // while the score is lower if they are more spread out
-            var score = 100 * (query.Length + 1) / ((1 + firstIndex) + (matchLen + 1));
+            var score1 = 100 * (query.Length + 1) / ((1 + firstIndex) + (matchLen + 1));
+
+            // [MOD] A match near the beginning of whole string is scored more
+            var score2 = new[] { 100 - firstMatchIndex, 0 }.Max();
+
+            // [MOD] A shorter full string
+            var score3 = new[] { 100 - stringToCompare.Length, 0 }.Max();
+
+            var score4 = new[] { 100 - (stringToCompare.Length - query.Length), 0 }.Max();
+
+            var score = (int)((score1 * 0.4) + (score2 * 0.2) + (score3 * 0.2) + (score4 * 0.2));
 
             // A match with less characters assigning more weights
             if (stringToCompare.Length - query.Length < 5)
