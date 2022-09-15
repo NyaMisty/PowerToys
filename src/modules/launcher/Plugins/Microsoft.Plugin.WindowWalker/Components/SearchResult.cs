@@ -88,15 +88,14 @@ namespace Microsoft.Plugin.WindowWalker.Components
         /// </remarks>
         private void CalculateScore()
         {
-            if (FuzzyMatching.CalculateScoreForMatches(SearchMatchesInProcessName) >
-                FuzzyMatching.CalculateScoreForMatches(SearchMatchesInTitle))
+            if (SearchMatchesInProcessName[0] > SearchMatchesInTitle[0])
             {
-                Score = FuzzyMatching.CalculateScoreForMatches(SearchMatchesInProcessName);
+                Score = SearchMatchesInProcessName[0];
                 BestScoreSource = TextType.ProcessName;
             }
             else
             {
-                Score = FuzzyMatching.CalculateScoreForMatches(SearchMatchesInTitle);
+                Score = SearchMatchesInTitle[0];
                 BestScoreSource = TextType.WindowTitle;
             }
         }

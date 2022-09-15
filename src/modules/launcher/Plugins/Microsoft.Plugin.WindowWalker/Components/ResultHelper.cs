@@ -42,6 +42,7 @@ namespace Microsoft.Plugin.WindowWalker.Components
                         x.Result.SwitchToWindow();
                         return true;
                     },
+                    Score = x.Score,
 
                     // For debugging you can set the second parameter to true to see more informations.
                     ToolTipData = GetToolTip(x.Result, false),

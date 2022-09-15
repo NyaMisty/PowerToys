@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using Wox.Infrastructure;
 
 namespace Microsoft.Plugin.WindowWalker.Components
 {
@@ -125,13 +126,11 @@ namespace Microsoft.Plugin.WindowWalker.Components
             {
                 foreach (var window in openWindows)
                 {
-                    var titleMatch = FuzzyMatching.FindBestFuzzyMatch(window.Title, searchString.SearchText);
-                    var processMatch = FuzzyMatching.FindBestFuzzyMatch(window.Process.Name, searchString.SearchText);
-
-                    if ((titleMatch.Count != 0 || processMatch.Count != 0) &&
-                                window.Title.Length != 0)
+                    var titleMatch = StringMatcher.FuzzySearch(searchString.SearchText, window.Title);
+                    var processMatch = StringMatcher.FuzzySearch(searchString.SearchText, window.Process.Name);
+                    if ((titleMatch.Score > 0 || processMatch.Score > 0) && window.Title.Length != 0)
                     {
-                        var temp = new SearchResult(window, titleMatch, processMatch, searchString.SearchType);
+                        var temp = new SearchResult(window, new[] { titleMatch.Score }.ToList(), new[] { processMatch.Score }.ToList(), searchString.SearchType);
                         result.Add(temp);
                     }
                 }
